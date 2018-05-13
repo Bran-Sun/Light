@@ -6,14 +6,16 @@
 
 void Scene::init()
 {
-    Object* s = new Sphere(Vec3(3, 0, 3), 1.0);
+    Object* s = new Sphere(Vec3(4, 0, 3), 2.0);
     s->setColor(Vec3( 0.7f, 0.7f, 0.7f ));
     s->setRef(0.6f);
+    s->setDiff(0.2f);
     m_objects.push_back(s);
     
-    Object* s2 = new Sphere(Vec3(-3, 0, 3), 1.0f);
-    s->setColor(Vec3( 1.0f, 0.7f, 0.0f));
-    s->setRef(0.7f);
+    Object* s2 = new Sphere(Vec3(-4.0, 0.0, 3.0), 2.0f);
+    s2->setColor(Vec3( 0.7f, 0.7f, 1.0f));
+    s2->setRef(0.3f);
+    s2->setDiff(0.1f);
     m_objects.push_back(s2);
     
     Light* light1 = new Light(Vec3(0.0, 6.0, 3.0));

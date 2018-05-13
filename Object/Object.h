@@ -21,11 +21,14 @@ public:
     Object() {}
     void setColor(Vec3 color) { m_color = color; }
     void setRef(float ref) { m_ref = ref; }
+    void setDiff(float diff) { m_diff = diff; }
+    float getDiff() { return m_diff; }
     float getRef() { return m_ref; }
+    Vec3 getColor() { return m_color; }
     virtual Vec3 getNormal(Vec3 &point) = 0;
     virtual InterResult intersection(Ray& ray, float &dist) = 0;
 private:
-    float m_ref;
+    float m_ref, m_diff;
     Vec3 m_color;
 };
 

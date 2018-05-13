@@ -10,13 +10,13 @@ InterResult Sphere::intersection(Ray &ray, float &dist)
     Vec3 v = m_origin - ray.GetOrigin();
     float a = v.Dot(ray.GetDirection());
     float b = m_radius * m_radius - v.SqrLength() + a * a;
-    if (b >= 0) {
+    if (b > 0) {
         b = sqrt(b);
-        if (a >= b) {
+        if (a > b) {
             result = HIT;
             dist = a - b;
         }
-        else if (b >= a && a >= (-b)) {
+        else if (b > a && a > (-b)) {
             result = INSIDE_HIT;
             dist = b + a;
         }

@@ -11,7 +11,7 @@ const int WINDOW_WIDTH = 800;
 const float PIC_HEIGHT = 10.0;
 const float PIC_WIDTH = 10.0;
 const float MIN_WEIGHT = 0.0001;
-const int MAX_DEPTH = 3;
+const int MAX_DEPTH = 4;
 
 void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
 {
@@ -25,7 +25,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
     float dist = 10000.0, dist_tmp = 0.0;
     InterResult res = MISS, res_tmp;
     Object *min_object = NULL;
-    Vec3 intersectPoint, N, V;
+    Vec3 intersectPoint, N, V, ob_color;
     
     for ( int i = 0; i < scene.getObjectNum(); i++ )
     {
@@ -41,12 +41,14 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
     
     if ( res == MISS ) return;
     else {
-        //std::cout << "find!" << std::endl;
         intersectPoint = ray.GetOrigin() + ray.GetDirection() * dist;
+        //std::cout << intersectPoint << std::endl;
         N = min_object->getNormal(intersectPoint);
+        //std::cout << N << std::endl;
         N.Normalize();
-        V = intersectPoint - ray.GetOrigin();
+        V = ray.GetOrigin() - intersectPoint;
         V.Normalize();
+        ob_color = min_object->getColor();
     }
     
     //whethter is in the shade and calculate the color
@@ -55,10 +57,10 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
         bool isShade = false;
         
         Light* light = scene.getLight(i);
-        Vec3 newdir = intersectPoint - light->getCenter();
-        Vec3 L = - newdir;
+        Vec3 newdir = light->getCenter() - intersectPoint;
+        Vec3 L = newdir;
         L.Normalize();
-        Ray newray(intersectPoint, newdir);
+        Ray newray(light->getCenter(), newdir);
         
         for (int j = 0; j < scene.getObjectNum(); j++)
         {
@@ -74,21 +76,34 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
             //std::cout << "great!" << std::endl;
             Vec3 v = light->getColor();
             Vec3 R = N * 2 * N.Dot(L) - L;
-            color = color +  v * min_object->getRef() * V.Dot(R);
+            //diffuse component
+            float dot = L.Dot(N);
+            if (dot > 0) {
+                color = color + v * dot * min_object->getDiff() * ob_color;
+            }
+            
+            //specular component;
+            float spec = (float)1.0 - min_object->getDiff();
+            dot = V.Dot(R);
+            if (dot > 0) {
+                color = color + v * spec * powf(dot, 2) * ob_color;
+            }
         }
     }
-    /*
+    
     float ref = min_object->getRef();
-    if (ref > 0) {
+    if (ref > 0)
+    {
         Vec3 newdir = N * 2 * N.Dot(V) - V;
-        Ray newray(intersectPoint, newdir);
+        Ray newray((intersectPoint + newdir * 0.0001), newdir);
         Vec3 RefColor;
         RayTrace(newray, depth + 1, weight * ref, RefColor, scene);
-        Color += RefColor;
-    }*/
+        color = color + (RefColor * ref) * ob_color;
+    }
 }
 
 void DrawPicture(Camera &camera, Scene &scene) {
+    
     for (int i = 0; i < WINDOW_HEIGHT; i++)
         for (int j = 0; j < WINDOW_WIDTH; j++)
         {
@@ -98,11 +113,11 @@ void DrawPicture(Camera &camera, Scene &scene) {
             camera.set_color(j, i, color);
         }
     /*
-    Ray ray = camera.GetRay(199, 389);
+    Ray ray = camera.GetRay(299, 399);
     std::cout << ray.GetDirection() << std::endl;
     Vec3 color;
     RayTrace(ray, 1, 1.0, color, scene);
-    camera.set_color(199, 389, color);
+    camera.set_color(349, 399, color);
     std::cout << color << std::endl;*/
 }
 
