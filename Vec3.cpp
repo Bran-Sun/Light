@@ -9,7 +9,7 @@ void Vec3::Normalize()
 {
     float l = Length();
     if (l == 0.0) {
-        printf("Length = 0, error!\n");
+        //printf("Length = 0, error!\n");
         return;
     }
     m_x /= l;

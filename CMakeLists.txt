@@ -5,6 +5,6 @@ find_package(OpenCV REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp Vec3.cpp Vec3.h)
-add_executable(DrawLine ${SOURCE_FILES})
-target_link_libraries(DrawLine ${OpenCV_LIBS})
+set(SOURCE_FILES main.cpp Vec3.cpp Vec3.h Camera.cpp Camera.h Scene.cpp Scene.h Object/Object.cpp Object/Object.h Object/Sphere.cpp Object/Sphere.h Light.cpp Light.h)
+add_executable(Light ${SOURCE_FILES})
+target_link_libraries(Light ${OpenCV_LIBS})
