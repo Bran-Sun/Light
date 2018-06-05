@@ -16,8 +16,15 @@ public:
     
     void set(float x, float y, float z) { m_x = x; m_y = y; m_z = z; }
     void Normalize();
+    float Power() {
+        return (m_x + m_y + m_z) / 3;
+    }
+    
+    Vec3 Cross(const Vec3 &v);
+    Vec3 rand_dir();
+    Vec3 refl(const Vec3 &v);
 
-    float Dot(Vec3 &m) {
+    float Dot(const Vec3 &m) {
         return m_x * m.m_x + m_y * m.m_y + m_z * m.m_z;
     }
     float Length() {
@@ -26,12 +33,19 @@ public:
     float SqrLength() {
         return m_x * m_x + m_y * m_y + m_z * m_z;
     }
-    void operator += (Vec3 &m) {
+    void operator += (const Vec3 &m) {
         m_x += m.m_x; m_y += m.m_y; m_z += m.m_z;
     }
-    void operator -= (Vec3 &m) {
+    void operator -= (const Vec3 &m) {
         m_x -= m.m_x; m_y -= m.m_y; m_z -= m.m_z;
     }
+    void operator *= (const float t) {
+        m_x *= t; m_y *= t; m_z *= t;
+    }
+    void operator *= (const Vec3 &m) {
+        m_x *= m.m_x; m_y *= m.m_y; m_z *= m.m_z;
+    }
+    
     Vec3 operator- () const { return Vec3( -m_x, -m_y, -m_z ); }
     
     friend Vec3 operator + (const Vec3 &a, const Vec3 &b) { return Vec3(a.m_x + b.m_x, a.m_y + b.m_y, a.m_z + b.m_z); }

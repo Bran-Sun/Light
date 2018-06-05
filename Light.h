@@ -16,6 +16,8 @@ public:
     void setColor(Vec3 color) { m_color = color; }
     Vec3& getCenter() { return m_center; }
     Vec3& getColor() { return m_color; }
+    float getPower() { return m_color.Power(); }
+    Vec3 GetEmitDir();
 private:
     Vec3 m_center, m_color;
 };

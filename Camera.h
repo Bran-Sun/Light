@@ -14,6 +14,8 @@ class Ray
 public:
     Ray() {}
     Ray(Vec3 ori, Vec3 dir) : m_ori(ori), m_dir(dir) { m_dir.Normalize(); }
+    void setOrigin(Vec3 ori) { m_ori = ori; }
+    void setDirection(Vec3 dir) { m_dir = dir; }
     Vec3& GetOrigin() { return m_ori; }
     Vec3& GetDirection() { return m_dir; }
 private:
@@ -45,6 +47,9 @@ public:
         cv::imshow(name, m_image);
         cv::waitKey(0);
     }
+    
+    int get_width() { return m_width; }
+    int get_height() { return m_height; }
 private:
     cv::Mat m_image;
     int m_width, m_height;

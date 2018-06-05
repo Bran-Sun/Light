@@ -13,12 +13,20 @@ InterResult Sphere::intersection(Ray &ray, float &dist)
     if (b > 0) {
         b = sqrt(b);
         if (a > b) {
-            result = HIT;
-            dist = a - b;
+            float dist_tmp = a - b;
+            if (dist_tmp >= dist) result = MISS;
+            else {
+                result = HIT;
+                dist = dist_tmp;
+            }
         }
         else if (b > a && a > (-b)) {
-            result = INSIDE_HIT;
-            dist = b + a;
+            float dist_tmp = b + a;
+            if (dist_tmp >= dist) result = MISS;
+            else {
+                result = INSIDE_HIT;
+                dist = dist_tmp;
+            }
         }
         else {
             result = MISS;
