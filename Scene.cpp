@@ -6,13 +6,14 @@
 
 void Scene::init()
 {
-    Object* s = new Sphere(Vec3(3, 0, 3), 1.5);
+    m_emitNum = 1000000;
+    Object* s = new Sphere(Vec3(3, 0, 3), 2.0);
     s->setColor(Vec3( 0.7f, 0.7f, 0.7f ));
     s->setRef(0.4f);
     s->setDiff(0.2f);
     m_objects.push_back(s);
     
-    Object* s2 = new Sphere(Vec3(-3.0, 0.0, 3.0), 1.5f);
+    Object* s2 = new Sphere(Vec3(-3.0, 0.0, 3.0), 2.0f);
     s2->setColor(Vec3( 0.7f, 0.7f, 1.0f));
     s2->setRef(0.3f);
     s2->setDiff(0.1f);

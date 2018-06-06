@@ -3,10 +3,13 @@
 //
 
 #include "PhotonMap.h"
+#include <algorithm>
 
 void PhotonMap::build()
 {
+    printf("building kd-tree with %d photon...\n", m_size);
     m_head = balance(0, m_size, X);
+    printf("building finished!\n");
 }
 
 PhNode *PhotonMap::balance(int l, int r, NodeType type)
@@ -23,26 +26,31 @@ PhNode *PhotonMap::balance(int l, int r, NodeType type)
     int mid = (l + r) >> 1;
     split(l, r, mid, type);
     node->photon = m_photons[mid];
-    node->lc = balance(l, mid, (type % 3) + 1);
-    node->rc = balance(mid + 1, r, (type % 3) + 1);
+    node->lc = balance(l, mid, NodeType((type % 3) + 1));
+    node->rc = balance(mid + 1, r, NodeType((type % 3) + 1));
     node->type = type;
     return node;
 }
 
 void PhotonMap::split(int st, int ed, int mid, NodeType type)
 {
+    ed--;
     while (st < ed) {
-        int l = st, r = ed - 1;
+        int l = st, r = ed;
+        //printf("l: %d, r: %d\n", l, r);
         float key = get_pos_value(m_photons[r], type);
+        int pos = r;
         do {
-            while (get_pos_value(m_photons[l], type) < key) l++;
-            while ((get_pos_value(m_photons[r], type) >= key) && (r > l)) r--;
+            while ((get_pos_value(m_photons[l], type) < key) && (l < r)) l++;
+            while ((get_pos_value(m_photons[r], type) > key) && (r > l)) r--;
             if (l < r) {
-                swap(l, r);
-                l++; r--;
+                swap(l, r);l++;
+                r--;
             }
         } while (l < r);
-        
+        if (l > mid) ed = l - 1;
+        else if (l < mid) st = l;
+        else return;
     }
 }
 
@@ -72,7 +80,7 @@ float PhotonMap::get_mid(float p1, float p2, float p3)
     else return p1;
 }
 
-bool PhotonMap::comp(Photon *p, float v, PhotonMap::NodeType type)
+bool PhotonMap::comp(Photon *p, float v, NodeType type)
 {
     if (type == X) return p->pos.m_x < v;
     if (type == Y) return p->pos.m_y < v;
@@ -80,7 +88,7 @@ bool PhotonMap::comp(Photon *p, float v, PhotonMap::NodeType type)
     return false;
 }
 
-float PhotonMap::get_pos_value(Photon *p, PhotonMap::NodeType type)
+float PhotonMap::get_pos_value(Photon *p, NodeType type)
 {
     if (type == X) return p->pos.m_x;
     if (type == Y) return p->pos.m_y;
@@ -93,6 +101,68 @@ void PhotonMap::swap(int l, int r)
     Photon* tem = m_photons[l];
     m_photons[l] = m_photons[r];
     m_photons[r] = tem;
+}
+
+Vec3 PhotonMap::Nearest(Vec3 &point, Vec3 &N)
+{
+    m_color.set(0, 0, 0);
+    m_point = point;
+    m_norm = N;
+    
+    cal_color(m_head);
+    m_color = m_color / (3.14 * m_r * m_r * m_r * 4 / 3);
+    return m_color;
+}
+
+void PhotonMap::cal_color(PhNode *node)
+{
+    // if is the leaf
+    if (node->type == LEAF) {
+        Vec3 d = m_point - node->photon->pos;
+        if (d.Length() < m_r) {
+            Photon *p = node->photon;
+            float f = m_norm.Dot(-p->dir);
+            if (f > 1e-5) m_color += p->color * f;
+        }
+        return;
+    }
+    
+    Photon* p = node->photon;
+    
+    float b = dis(node, m_point);
+    if (b > 0) {
+        if (node->lc) cal_color(node->lc);
+        Vec3 d = m_point - p->pos;
+        if (d.Length() < m_r) {
+            float f = m_norm.Dot(-p->dir);
+            if (f > 1e-5) m_color += p->color * f;
+        }
+        if ((abs(b) < m_r) && node->rc) cal_color(node->rc);
+    }
+    else {
+        if (node->rc) cal_color(node->rc);
+        Vec3 d = m_point - p->pos;
+        if (d.Length() < m_r) {
+            float f = m_norm.Dot(-p->dir);
+            if (f > 1e-5) m_color += p->color * f;
+        }
+        if ((abs(b) < m_r) && node->lc) cal_color(node->lc);
+    }
+}
+
+float PhotonMap::dis(PhNode *node, const Vec3 &v)
+{
+    if (node->type == X) {
+        return node->photon->pos.m_x - v.m_x;
+    }
+    
+    if (node->type == Y) {
+        return node->photon->pos.m_y - v.m_y;
+    }
+    if (node->type == Z) {
+        return node->photon->pos.m_z - v.m_z;
+    }
+    return false;
 }
 
 

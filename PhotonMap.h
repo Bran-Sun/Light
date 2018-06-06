@@ -9,32 +9,35 @@
 #include "Scene.h"
 #include <vector>
 
+
+
 struct Photon
 {
     Vec3 pos, dir, color;
+};
+
+enum NodeType
+{
+    LEAF = 0,
+    X = 1,
+    Y = 2,
+    Z = 3
 };
 
 struct PhNode
 {
     Photon *photon;
     PhNode *lc, *rc;
-    PhotonMap::NodeType type;
+    NodeType type;
 };
 
 class PhotonMap
 {
 public:
-    enum NodeType
-    {
-        LEAF = 0,
-        X,
-        Y,
-        Z
-    };
     
     PhotonMap() {
         m_size = 0;
-        m_r = 0.0;
+        m_r = 0.5;
         m_head = NULL;
     }
     void setEmitNum(int num) { m_whole_num = num; }
@@ -44,6 +47,9 @@ public:
     bool comp(Photon* p1, Photon* p2, NodeType type);
     bool comp(Photon *p, float v, NodeType type);
     float get_pos_value(Photon *p, NodeType type);
+    Vec3 Nearest(Vec3 &point, Vec3 &N);
+    void cal_color(PhNode *node);
+    float dis(PhNode* node, const Vec3 &v);
     
     float get_mid(float p1, float p2, float p3);
     
@@ -59,6 +65,7 @@ private:
     std::vector<Photon*> m_photons;
     int m_size, m_whole_num;
     PhNode *m_head;
+    Vec3 m_point, m_color, m_norm;
     float m_r;
 };
 

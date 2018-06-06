@@ -42,6 +42,9 @@ public:
     void operator *= (const float t) {
         m_x *= t; m_y *= t; m_z *= t;
     }
+    void operator /= (const float t) {
+        m_x /= t; m_y /= t; m_z /= t;
+    }
     void operator *= (const Vec3 &m) {
         m_x *= m.m_x; m_y *= m.m_y; m_z *= m.m_z;
     }
@@ -52,6 +55,7 @@ public:
     friend Vec3 operator - (const Vec3 &a, const Vec3 &b) { return Vec3(a.m_x - b.m_x, a.m_y - b.m_y, a.m_z - b.m_z); }
     friend std::ostream& operator << (std::ostream &os, const Vec3 &m) { os << "x: " << m.m_x << ", y: " << m.m_y << ", z: " << m.m_z << " "; return os;}
     friend Vec3 operator * (const Vec3 &a, const float b) { return Vec3(a.m_x * b, a.m_y * b, a.m_z * b); }
+    friend Vec3 operator / (const Vec3 &a, const float b) { return Vec3(a.m_x / b, a.m_y / b, a.m_z / b); }
     friend Vec3 operator * (const Vec3 &a, const Vec3 &b) { return Vec3(a.m_x * b.m_x, a.m_y * b.m_y, a.m_z * b.m_z); }
 public:
     float m_x, m_y, m_z;

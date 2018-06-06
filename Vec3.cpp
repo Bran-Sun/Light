@@ -37,5 +37,7 @@ Vec3 Vec3::Cross(const Vec3 &v)
 
 Vec3 Vec3::refl(const Vec3 &v)
 {
-    return (*this) * 2 * Dot(v) - v;
+    Vec3 p = (*this) * 2 * Dot(v) - v;
+    p.Normalize();
+    return p;
 }

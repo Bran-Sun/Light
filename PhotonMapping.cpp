@@ -7,25 +7,36 @@
 #include <ctime>
 #include <cstdlib>
 
-void DrawWithPhtonMapping(Camera &camera, Scene& scene)
+void DrawWithPhotonMapping(Camera &camera, Scene& scene)
 {
     PhotonMap photon_map;
     generate_photons(scene, photon_map);
     photon_map.build();
     
+    printf("starting ray tracing...\n");
     
     for (int i = 0; i < camera.get_height(); i++)
-        for (int j = 0; j < camera.get_width(); j++)
+    {
+        for ( int j = 0; j < camera.get_width(); j++ )
         {
             Ray ray = camera.GetRay(j, i);
             Vec3 color;
-            PhotonTrace(ray);
+            PhotonRayTrace(ray, 1, color, scene, photon_map);
+            std::cout << color << std::endl;
             camera.set_color(j, i, color);
         }
+        printf("finish line %d\n", i);
+    }
+    /*Ray ray = camera.GetRay(200, 400);
+    Vec3 color;
+    PhotonRayTrace(ray, 1, color, scene, photon_map);
+    camera.set_color(200, 400, color);*/
+    printf("tracing finished!\n");
 }
 
 void generate_photons(Scene &scene, PhotonMap &photon_map)
 {
+    printf("generating photons...\n");
     srand(unsigned(time(0)));
     
     int photon_num = scene.getEmitNum();
@@ -99,7 +110,8 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
         Photon *storePhoton = (Photon*)malloc(sizeof(Photon));
         *storePhoton = *photon;
         storePhoton->pos = intersectionPoint;
-        storePhoton->color *= min_ob->getColor();
+        //std::cout << intersectionPoint << std::endl;
+        //storePhoton->color *= min_ob->getColor();
         photon_map.store(storePhoton);
     }
     
@@ -120,4 +132,44 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
         free(photon);
         return;
     }
+}
+
+void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &photon_map)
+{
+    color.set(0, 0, 0);
+    if (depth >= MAX_DEPTH) return;
+    
+    int ob_num = scene.getObjectNum();
+    InterResult  res = MISS, res_tmp;
+    Object *min_ob = nullptr;
+    Vec3 intersectionPoint, N, V, L;
+    float dist = 100.0;
+    for (int i = 0; i < ob_num; i++)
+    {
+        Object *ob = scene.getObject(i);
+        res_tmp = ob->intersection(ray, dist);
+        if (res_tmp != MISS)
+        {
+            res = res_tmp;
+            min_ob = ob;
+        }
+    }
+    if (res == MISS) return;
+    intersectionPoint = ray.GetOrigin() + ray.GetDirection() * dist;
+    
+    N = min_ob->getNormal(intersectionPoint);
+    N.Normalize();
+    
+    color += photon_map.Nearest(intersectionPoint, N) * min_ob->getColor() * min_ob->getDiff();
+    //std::cout << color << std::endl;
+    //reflection
+    if (min_ob->getRef() <= 1e-5) return;
+    
+    V = ray.GetOrigin() - intersectionPoint;
+    V.Normalize();
+    Vec3 newdir = N * 2 * N.Dot(V) - V;
+    Ray newray(intersectionPoint + newdir * 0.0001, newdir);
+    Vec3 refcolor;
+    PhotonRayTrace(newray, depth + 1, refcolor, scene, photon_map);
+    color += refcolor * min_ob->getRef() * min_ob->getColor();
 }

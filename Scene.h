@@ -16,9 +16,7 @@ class Scene
 {
 public:
     Scene() {}
-    void init() {
-        m_emitNum = 1000000;
-    }
+    void init();
     void setEmitNum(int num) { m_emitNum = num; }
     int getEmitNum() { return m_emitNum; }
     int getObjectNum() { return m_object_num; }

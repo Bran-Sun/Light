@@ -5,7 +5,7 @@
 #include "Vec3.h"
 #include "Camera.h"
 #include "Scene.h"
-#include "RayTrace.h"
+#include "PhotonMapping.h"
 
 const int WINDOW_HEIGHT = 800;
 const int WINDOW_WIDTH = 800;
@@ -24,7 +24,7 @@ int main()
     scene.init();
     
     //DrawWithRayTrace(camera, scene);
-    DrawWithPhtonMapping(camera,scene);
+    DrawWithPhotonMapping(camera,scene);
     
     camera.show("RayTrace");
     return 0;
