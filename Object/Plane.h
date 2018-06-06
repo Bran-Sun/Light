@@ -7,6 +7,7 @@
 
 #include "Object.h"
 
+//require z > 0
 class Plane : public Object
 {
 public:

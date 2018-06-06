@@ -32,9 +32,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
     if ( res == MISS ) return;
     else {
         intersectPoint = ray.GetOrigin() + ray.GetDirection() * dist;
-        //std::cout << intersectPoint << std::endl;
         N = min_object->getNormal(intersectPoint);
-        //std::cout << N << std::endl;
         N.Normalize();
         V = ray.GetOrigin() - intersectPoint;
         V.Normalize();
@@ -84,7 +82,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
         }
     }
     
-    float ref = min_object->getRef();
+    float ref = min_object->getRefl();
     if (ref > 0)
     {
         Vec3 newdir = N * 2 * N.Dot(V) - V;

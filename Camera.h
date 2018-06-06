@@ -48,6 +48,12 @@ public:
         cv::waitKey(0);
     }
     
+    void save(std::string name) {
+        cv::Mat temp;
+        m_image.convertTo(temp, CV_8UC3, 255.0);
+        cv::imwrite(name.c_str(), temp);
+    }
+    
     int get_width() { return m_width; }
     int get_height() { return m_height; }
 private:

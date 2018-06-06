@@ -37,13 +37,13 @@ public:
     
     PhotonMap() {
         m_size = 0;
-        m_r = 0.5;
+        m_r = 0.05;
         m_head = NULL;
     }
     void setEmitNum(int num) { m_whole_num = num; }
     void setRadius(float r) { m_r = r; }
     void build(); //build kd_tree
-    void split(int l, int r, int mid, NodeType);
+    void sort(int l, int r, NodeType);
     bool comp(Photon* p1, Photon* p2, NodeType type);
     bool comp(Photon *p, float v, NodeType type);
     float get_pos_value(Photon *p, NodeType type);
@@ -63,7 +63,7 @@ public:
     
 private:
     std::vector<Photon*> m_photons;
-    int m_size, m_whole_num;
+    int m_size, m_whole_num, m_search;
     PhNode *m_head;
     Vec3 m_point, m_color, m_norm;
     float m_r;

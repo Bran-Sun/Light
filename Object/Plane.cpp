@@ -16,7 +16,15 @@ InterResult Plane::intersection(Ray &ray, float &dist)
     if (dist_tmp <= 0) return MISS;
     else if (dist_tmp >= dist) return MISS;
     else {
-        dist = dist_tmp;
-        return HIT;
+        Vec3 point = ray.GetOrigin() + ray.GetDirection() * dist_tmp;
+        if (point.m_z >= 0)
+        {
+            dist = dist_tmp;
+            return HIT;
+        }
+        else
+        {
+            return MISS;
+        }
     }
 }

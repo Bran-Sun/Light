@@ -6,6 +6,7 @@
 #define LIGHT_LIGHT_H
 
 #include "Vec3.h"
+#include "Object/Object.h"
 
 class Light
 {
@@ -17,9 +18,42 @@ public:
     Vec3& getCenter() { return m_center; }
     Vec3& getColor() { return m_color; }
     float getPower() { return m_color.Power(); }
-    Vec3 GetEmitDir();
-private:
+    virtual Ray GetEmitRay() = 0;
+    virtual InterResult intersection(Ray &ray, float &dist) = 0;
+protected:
     Vec3 m_center, m_color;
+};
+
+class SpotLight: public Light
+{
+public:
+    SpotLight(Vec3 center) : Light(center) {}
+    virtual Ray GetEmitRay();
+    virtual InterResult intersection(Ray &ray, float &dist) {
+        return MISS;
+    }
+};
+
+
+//require horizon
+class SquareLight: public Light
+{
+public:
+    SquareLight(float y, float x0, float x1, float z0, float z1) : Light() {
+        m_norm.set(0, 1.0, 0);
+        m_x0 = x0; m_x1 = x1; m_z0 = z0; m_z1 = z1;
+        m_y = y;
+    }
+    
+    virtual Ray GetEmitRay();
+    void setBorder(int x0, int x1, int z0, int z1) {
+        m_x0 = x0; m_x1 = x1; m_z0 = z0; m_z1 = z1;
+    }
+    void sety(float y) { m_y = y; }
+    virtual InterResult intersection(Ray &ray, float &dist);
+private:
+    Vec3 m_norm;
+    float m_x0, m_x1, m_z0, m_z1, m_y;
 };
 
 

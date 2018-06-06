@@ -24,8 +24,9 @@ int main()
     scene.init();
     
     //DrawWithRayTrace(camera, scene);
-    DrawWithPhotonMapping(camera,scene);
+    DrawWithPhotonMapping(camera, scene);
     
+    camera.save("RayTrace.png");
     camera.show("RayTrace");
     return 0;
 }
