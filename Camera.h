@@ -42,7 +42,8 @@ public:
         Vec3 pix_pos(m_Left - x * m_wInv, m_Top - y * m_hInv, 0);
         return Ray(m_o, pix_pos - m_o);
     }
-    
+    Vec3 GetEyePoint() { return m_o; }
+    Vec3 GetPixelCenter(int x, int y) { return Vec3(m_Left - x * m_wInv, m_Top - y * m_hInv, 0); }
     void show(std::string name) {
         cv::imshow(name, m_image);
         cv::waitKey(0);
@@ -56,6 +57,8 @@ public:
     
     int get_width() { return m_width; }
     int get_height() { return m_height; }
+    float get_hInv() { return m_hInv; }
+    float get_wInv() { return m_wInv; }
 private:
     cv::Mat m_image;
     int m_width, m_height;

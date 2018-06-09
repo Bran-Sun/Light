@@ -8,6 +8,7 @@
 void PhotonMap::build()
 {
     printf("building kd-tree with %d photon...\n", m_size);
+    build_node = 0;
     m_head = balance(0, m_size, X);
     printf("building finished!\n");
 }
@@ -15,6 +16,8 @@ void PhotonMap::build()
 PhNode *PhotonMap::balance(int l, int r, NodeType type)
 {
     if (l == r) return nullptr;
+    build_node++;
+    if ( build_node % 500000 == 0 ) printf("finish %d nodes\n", build_node);
     PhNode *node = (PhNode*)malloc(sizeof(PhNode));
     if (l == (r - 1)) {
         node->type = LEAF;
@@ -24,7 +27,11 @@ PhNode *PhotonMap::balance(int l, int r, NodeType type)
         return node;
     }
     int mid = (l + r) >> 1;
-    sort(l, r, type);
+    sort(l, r, mid, type);
+    /*printf("%d, %d, %d\n", 0, r - l, mid - l);
+    for (int i = l; i < r; i++)
+        printf("%.4f\t", get_pos_value(m_photons[i], type));
+    printf("\n");*/
     node->photon = m_photons[mid];
     node->lc = balance(l, mid, NodeType((type % 3) + 1));
     node->rc = balance(mid + 1, r, NodeType((type % 3) + 1));
@@ -32,7 +39,7 @@ PhNode *PhotonMap::balance(int l, int r, NodeType type)
     return node;
 }
 
-void PhotonMap::sort(int st, int ed, NodeType type)
+void PhotonMap::sort(int st, int ed, int mid, NodeType type)
 {
     if (st >= (ed - 1)) return;
     swap(st, st + rand() % (ed - st));
@@ -55,8 +62,11 @@ void PhotonMap::sort(int st, int ed, NodeType type)
         }
     }
     m_photons[lo] = p;
-    sort(st, lo, type);
-    sort(lo + 1, ed, type);
+    if (lo < mid) sort(lo + 1, ed, mid, type);
+    else if (lo > mid) sort(st, lo, mid, type);
+    else return;
+    //sort(st, lo, type);
+    //sort(lo + 1, ed, type);
 }
 
 bool PhotonMap::comp(Photon *p1, Photon *p2, NodeType type)
@@ -71,18 +81,6 @@ bool PhotonMap::comp(Photon *p1, Photon *p2, NodeType type)
         return p1->pos.m_z < p2->pos.m_z;
     }
     return false;
-}
-
-float PhotonMap::get_mid(float p1, float p2, float p3)
-{
-    if (p1 < p2) {
-        if (p2 < p3) return p2;
-        else if (p1 < p3) return p3;
-        else return p1;
-    }
-    else if (p2 > p3) return p2;
-    else if (p1 > p3) return p3;
-    else return p1;
 }
 
 bool PhotonMap::comp(Photon *p, float v, NodeType type)
@@ -182,5 +180,6 @@ float PhotonMap::dis(PhNode *node, const Vec3 &v)
     }
     return 0.0;
 }
+
 
 

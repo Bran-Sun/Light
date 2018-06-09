@@ -7,6 +7,8 @@
 #include <ctime>
 #include <cstdlib>
 
+#define Square 512
+
 void DrawWithPhotonMapping(Camera &camera, Scene& scene)
 {
     PhotonMap photon_map;
@@ -15,23 +17,38 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
     
     printf("starting ray tracing...\n");
     
+    float hInv, wInv;
+    hInv = camera.get_wInv();
+    wInv = camera.get_hInv();
+    float weight[3][3] = {0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
+    Vec3 eye_point = camera.GetEyePoint();
+    
     for (int i = 0; i < camera.get_height(); i++)
     {
         for ( int j = 0; j < camera.get_width(); j++ )
         {
-            Ray ray = camera.GetRay(j, i);
-            Vec3 color;
-            PhotonRayTrace(ray, 1, color, scene, photon_map);
-            //std::cout << color << std::endl;
-            camera.set_color(j, i, color * 512.0);
+            Vec3 sumColor(0, 0, 0);
+            Vec3 pos = camera.GetPixelCenter(j, i);
+            for (int k = -1; k < 2; k++)
+                for (int t = -1; t < 2; t++)
+                {
+                    Vec3 new_pos(pos.m_x + k * wInv / 4, pos.m_y + t * hInv / 4, pos.m_z);
+                    Ray ray(eye_point, new_pos - eye_point);
+                    Vec3 color;
+                    PhotonRayTrace(ray, 1, color, scene, photon_map);
+                    //std::cout << color << std::endl;
+                    sumColor += color * weight[k + 1][t + 1];
+                }
+            //std::cout << sumColor << std::endl;
+            camera.set_color(j, i, sumColor * Square);
         }
-        printf("finish line %d\n", i);
+        if (i % 40 == 0) printf("finish line %d\n", i);
     }
-    /*Ray ray = camera.GetRay(400, 750);
+    /*Ray ray = camera.GetRay(400, 400);
     Vec3 color;
     PhotonRayTrace(ray, 1, color, scene, photon_map);
-    camera.set_color(400, 750, color);
-    std::cout << color * 800 << std::endl;*/
+    camera.set_color(400, 400, color);
+    std::cout << color * 512.0 << std::endl;*/
     
     printf("tracing finished!\n");
 }
@@ -71,7 +88,7 @@ void generate_photons(Scene &scene, PhotonMap &photon_map)
 
 void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
 {
-    if (depth >= MAX_DEPTH) {
+    if (depth > MAX_DEPTH) {
         free(photon);
         return;
     }
@@ -107,7 +124,7 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
     float diff = min_ob->getDiff();
     float spec = min_ob->getSpec();
     float refr = min_ob->getRefr();
-    float prob = (float) ((double)rand() / RAND_MAX);
+    float prob = (float) ((double)(rand() % RAND_MAX) / RAND_MAX);
     
     //whether store the photon
     if (diff > 1e-5) {
@@ -129,7 +146,7 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
     else if (prob < (diff + spec)) {
         photon->dir = N.refl(-photon->dir);
         photon->pos = intersectionPoint + photon->dir * 0.00001;
-        //photon->color *= min_ob->getColor();
+        photon->color *= min_ob->getColor();
         PhotonTrace(photon, scene, photon_map, depth + 1);
     }
     else if (prob < (diff + spec + refr)){
@@ -142,7 +159,7 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
         newdir.Normalize();
         photon->dir = newdir;
         photon->pos = intersectionPoint + photon->dir * 0.00001;
-        //photon->color *= min_ob->getColor();
+        photon->color *= min_ob->getColor();
         PhotonTrace(photon, scene, photon_map, depth + 1);
     }
     else {
@@ -154,7 +171,7 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
 void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &photon_map)
 {
     color.set(0, 0, 0);
-    if (depth >= MAX_DEPTH) return;
+    if (depth > MAX_DEPTH) return;
     
     int ob_num = scene.getObjectNum();
     InterResult  res = MISS, res_tmp;
@@ -185,7 +202,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
         }
     }
     if (res_light != MISS && dist_light <= dist) {
-        color.set(1.0, 1.0, 1.0);
+        color.set((float) (1.0 / Square), (float) (1.0 / Square), (float) (1.0 / Square));
         return;
     }
     if (res == MISS) return;
@@ -205,7 +222,6 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
     //diff
     if (diff > 1e-5)
         color += photon_map.Nearest(intersectionPoint, N) * min_ob->getColor() * diff;
-    //std::cout << color << std::endl;
     //spec
     if (spec > 1e-5) {
         Vec3 newdir = N * 2 * N.Dot(V) - V;
@@ -214,6 +230,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
         Vec3 refcolor;
         PhotonRayTrace(newray, depth + 1, refcolor, scene, photon_map);
         color += refcolor * spec * min_ob->getColor();
+        //std::cout << depth << " spec " << refcolor << std::endl;
     }
     //refraction
     if (refr > 1e-5) {
@@ -228,6 +245,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
         Vec3 refrcolor;
         PhotonRayTrace(newray, depth + 1, refrcolor, scene, photon_map);
         color += refrcolor * refr;
+        //std::cout << depth << " refra " << refrcolor << std::endl;
     }
     //std::cout << refcolor << std::endl;
 }

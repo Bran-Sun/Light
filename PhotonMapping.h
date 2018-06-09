@@ -8,7 +8,7 @@
 #include "Scene.h"
 #include "PhotonMap.h"
 
-const int MAX_DEPTH = 5;
+const int MAX_DEPTH = 6;
 const float MIN_WEIGHT = 0.0001;
 
 void DrawWithPhotonMapping(Camera &camera, Scene& scene);
