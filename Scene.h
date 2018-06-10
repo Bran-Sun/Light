@@ -8,6 +8,7 @@
 #include "Object/Object.h"
 #include "Object/Sphere.h"
 #include "Object/Plane.h"
+#include "Object/Bezier.h"
 #include "Light.h"
 #include <vector>
 

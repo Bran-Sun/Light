@@ -11,12 +11,12 @@ class Sphere : public Object
 {
 public:
     Sphere() {}
-    Sphere(Vec3 origin, float radius) : m_origin(origin), m_radius(radius) {}
-    virtual InterResult intersection(Ray &ray, float &dist);
+    Sphere(Vec3 origin, double radius) : m_origin(origin), m_radius(radius) {}
+    virtual InterResult intersection(Ray &ray, double &dist);
     virtual Vec3 getNormal(Vec3 &point);
 private:
     Vec3 m_origin;
-    float m_radius;
+    double m_radius;
 };
 
 

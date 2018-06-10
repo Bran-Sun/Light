@@ -12,12 +12,12 @@ class Plane : public Object
 {
 public:
     Plane() {}
-    Plane(Vec3 normal, float d): m_normal(normal), m_d(d) { }
-    virtual InterResult intersection(Ray &ray, float &dist);
+    Plane(Vec3 normal, double d): m_normal(normal), m_d(d) { }
+    virtual InterResult intersection(Ray &ray, double &dist);
     virtual Vec3 getNormal(Vec3 &point) { return m_normal; }
 private:
     Vec3 m_normal;
-    float m_d;
+    double m_d;
 };
 
 

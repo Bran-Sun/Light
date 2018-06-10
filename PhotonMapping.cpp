@@ -7,7 +7,7 @@
 #include <ctime>
 #include <cstdlib>
 
-#define Square 512
+#define Square 600
 
 void DrawWithPhotonMapping(Camera &camera, Scene& scene)
 {
@@ -17,10 +17,10 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
     
     printf("starting ray tracing...\n");
     
-    float hInv, wInv;
+    double hInv, wInv;
     hInv = camera.get_wInv();
     wInv = camera.get_hInv();
-    float weight[3][3] = {0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
+    double weight[3][3] = {0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
     Vec3 eye_point = camera.GetEyePoint();
     
     for (int i = 0; i < camera.get_height(); i++)
@@ -29,6 +29,7 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
         {
             Vec3 sumColor(0, 0, 0);
             Vec3 pos = camera.GetPixelCenter(j, i);
+            /*
             for (int k = -1; k < 2; k++)
                 for (int t = -1; t < 2; t++)
                 {
@@ -38,7 +39,9 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
                     PhotonRayTrace(ray, 1, color, scene, photon_map);
                     //std::cout << color << std::endl;
                     sumColor += color * weight[k + 1][t + 1];
-                }
+                }*/
+            Ray ray(eye_point, pos - eye_point);
+            PhotonRayTrace(ray, 1, sumColor, scene, photon_map);
             //std::cout << sumColor << std::endl;
             camera.set_color(j, i, sumColor * Square);
         }
@@ -62,14 +65,14 @@ void generate_photons(Scene &scene, PhotonMap &photon_map)
     photon_map.setEmitNum(photon_num);
     
     int light_num = scene.getLightNum();
-    float total_power = 0.0;
+    double total_power = 0.0;
     for (int i = 0; i < light_num; i++)
         total_power += scene.getLight(i)->getPower();
     
     for (int i = 0; i < light_num; i++)
     {
         Light* light = scene.getLight(i);
-        float light_power = scene.getLight(i)->getPower();
+        double light_power = scene.getLight(i)->getPower();
         int n_max = int(photon_num * light_power / total_power);
         
         int count = 0;
@@ -82,6 +85,7 @@ void generate_photons(Scene &scene, PhotonMap &photon_map)
             photon->color = light->getColor();
             PhotonTrace(photon, scene, photon_map, 1);
             count++;
+            if (count % 200000 == 0) printf("emit %d photons\n", count);
         }
     }
 }
@@ -97,7 +101,7 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
     InterResult  res = MISS, res_tmp;
     Object *min_ob = NULL;
     Vec3 intersectionPoint, N, V, L;
-    float dist = 24.0;
+    double dist = 24.0;
     for (int i = 0; i < scene.getObjectNum(); i++)
     {
         Object *ob = scene.getObject(i);
@@ -121,11 +125,14 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
     V.Normalize();
     if (N.Dot(V) < 0) N = -N;
     
-    float diff = min_ob->getDiff();
-    float spec = min_ob->getSpec();
-    float refr = min_ob->getRefr();
-    float prob = (float) ((double)(rand() % RAND_MAX) / RAND_MAX);
-    
+    double diff = min_ob->getDiff();
+    double spec = min_ob->getSpec();
+    double refr = min_ob->getRefr();
+    double prob = (double) ((double)(rand() % RAND_MAX) / RAND_MAX);
+    Vec3 ob_color(0, 0, 0);
+    Texture *t = min_ob->getTexture();
+    if (t == nullptr) ob_color = min_ob->getColor();
+    else ob_color = t->getColor(intersectionPoint.m_x, intersectionPoint.m_z);
     //whether store the photon
     if (diff > 1e-5) {
         Photon *storePhoton = (Photon*)malloc(sizeof(Photon));
@@ -140,26 +147,26 @@ void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth)
     if (prob < diff) {
         photon->dir = N.rand_dir();
         photon->pos = intersectionPoint + photon->dir * 0.00001;
-        photon->color *= min_ob->getColor();
+        photon->color *= ob_color;
         PhotonTrace(photon, scene, photon_map, depth + 1);
     }//specular reflect
     else if (prob < (diff + spec)) {
         photon->dir = N.refl(-photon->dir);
         photon->pos = intersectionPoint + photon->dir * 0.00001;
-        photon->color *= min_ob->getColor();
+        photon->color *= ob_color;
         PhotonTrace(photon, scene, photon_map, depth + 1);
     }
     else if (prob < (diff + spec + refr)){
-        float eta;
-        if (res == INSIDE_HIT) eta = (float) (1.0 / min_ob->getRefractionIndex());
+        double eta;
+        if (res == INSIDE_HIT) eta = (double) (1.0 / min_ob->getRefractionIndex());
         else eta = min_ob->getRefractionIndex();
-        float cos1 = N.Dot(V);
-        float cos2 = sqrt(1 - 1 / (eta * eta) * (1 - cos1 * cos1));
+        double cos1 = N.Dot(V);
+        double cos2 = sqrt(1 - 1 / (eta * eta) * (1 - cos1 * cos1));
         Vec3 newdir = - V * 1.0 / eta - N * (cos2 - 1.0 / eta * cos1);
         newdir.Normalize();
         photon->dir = newdir;
         photon->pos = intersectionPoint + photon->dir * 0.00001;
-        photon->color *= min_ob->getColor();
+        photon->color *= ob_color;
         PhotonTrace(photon, scene, photon_map, depth + 1);
     }
     else {
@@ -177,7 +184,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
     InterResult  res = MISS, res_tmp;
     Object *min_ob = nullptr;
     Vec3 intersectionPoint, N, V, L;
-    float dist = 100.0;
+    double dist = 100.0;
     for (int i = 0; i < ob_num; i++)
     {
         Object *ob = scene.getObject(i);
@@ -191,7 +198,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
     
     int light_num = scene.getLightNum();
     InterResult res_light = MISS, res_tmp_light;
-    float dist_light = 100.0;
+    double dist_light = 100.0;
     for (int i = 0; i < light_num; i++)
     {
         Light *ob = scene.getLight(i);
@@ -202,7 +209,7 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
         }
     }
     if (res_light != MISS && dist_light <= dist) {
-        color.set((float) (1.0 / Square), (float) (1.0 / Square), (float) (1.0 / Square));
+        color.set((double) (1.0 / Square), (double) (1.0 / Square), (double) (1.0 / Square));
         return;
     }
     if (res == MISS) return;
@@ -214,14 +221,17 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
     V.Normalize();
     if (N.Dot(V) < 0) N = -N;
     
-    float refl = min_ob->getRefl();
-    float diff = min_ob->getDiff();
-    float spec = min_ob->getSpec();
-    float refr = min_ob->getRefr();
-    
+    double refl = min_ob->getRefl();
+    double diff = min_ob->getDiff();
+    double spec = min_ob->getSpec();
+    double refr = min_ob->getRefr();
+    Vec3 ob_color(0, 0, 0);
+    Texture *t = min_ob->getTexture();
+    if (t == nullptr) ob_color = min_ob->getColor();
+    else ob_color = t->getColor(intersectionPoint.m_x, intersectionPoint.m_z);
     //diff
     if (diff > 1e-5)
-        color += photon_map.Nearest(intersectionPoint, N) * min_ob->getColor() * diff;
+        color += photon_map.Nearest(intersectionPoint, N) * ob_color * diff;
     //spec
     if (spec > 1e-5) {
         Vec3 newdir = N * 2 * N.Dot(V) - V;
@@ -229,22 +239,22 @@ void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &ph
         Ray newray(intersectionPoint + newdir * 0.00001, newdir);
         Vec3 refcolor;
         PhotonRayTrace(newray, depth + 1, refcolor, scene, photon_map);
-        color += refcolor * spec * min_ob->getColor();
+        color += refcolor * spec * ob_color;
         //std::cout << depth << " spec " << refcolor << std::endl;
     }
     //refraction
     if (refr > 1e-5) {
-        float eta;
-        if (res == INSIDE_HIT) eta = (float) (1.0 / min_ob->getRefractionIndex());
+        double eta;
+        if (res == INSIDE_HIT) eta = (double) (1.0 / min_ob->getRefractionIndex());
         else eta = min_ob->getRefractionIndex();
-        float cos1 = N.Dot(V);
-        float cos2 = sqrt(1 - 1 / (eta * eta) * (1 - cos1 * cos1));
+        double cos1 = N.Dot(V);
+        double cos2 = sqrt(1 - 1 / (eta * eta) * (1 - cos1 * cos1));
         Vec3 newdir = - V * 1.0 / eta - N * (cos2 - 1.0 / eta * cos1);
         newdir.Normalize();
         Ray newray(intersectionPoint + newdir * 0.00001, newdir);
         Vec3 refrcolor;
         PhotonRayTrace(newray, depth + 1, refrcolor, scene, photon_map);
-        color += refrcolor * refr;
+        color += refrcolor * refr *ob_color;
         //std::cout << depth << " refra " << refrcolor << std::endl;
     }
     //std::cout << refcolor << std::endl;

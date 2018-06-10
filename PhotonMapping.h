@@ -9,7 +9,7 @@
 #include "PhotonMap.h"
 
 const int MAX_DEPTH = 6;
-const float MIN_WEIGHT = 0.0001;
+const double MIN_WEIGHT = 0.0001;
 
 void DrawWithPhotonMapping(Camera &camera, Scene& scene);
 void generate_photons(Scene &scene, PhotonMap &photon_map);

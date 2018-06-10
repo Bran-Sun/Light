@@ -4,7 +4,7 @@
 
 #include "RayTrace.h"
 
-void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
+void RayTrace(Ray ray, int depth, double weight, Vec3 &color, Scene &scene)
 {
     color.set(0.0, 0.0, 0.0);  //also background color
     
@@ -13,7 +13,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
     if ( depth >= MAX_DEPTH ) return;
     
     //whether there are intersections
-    float dist = 10000.0;
+    double dist = 10000.0;
     InterResult res = MISS, res_tmp;
     Object *min_object = NULL;
     Vec3 intersectPoint, N, V, ob_color;
@@ -49,7 +49,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
         
         Light* light = scene.getLight(i);
         Vec3 newdir = light->getCenter() - intersectPoint;
-        float d = newdir.Length();
+        double d = newdir.Length();
         Vec3 L = newdir;
         L.Normalize();
         Ray newray(intersectPoint + newdir * 0.0001, newdir);
@@ -68,13 +68,13 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
             Vec3 v = light->getColor();
             Vec3 R = N * 2 * N.Dot(L) - L;
             //diffuse component
-            float dot = L.Dot(N);
+            double dot = L.Dot(N);
             if (dot > 0) {
                 color = color + v * dot * min_object->getDiff() * ob_color;
             }
             
             //specular component;
-            float spec = (float)1.0 - min_object->getDiff();
+            double spec = (double)1.0 - min_object->getDiff();
             dot = V.Dot(R);
             if (dot > 0) {
                 color = color + v * spec * powf(dot, 2) * ob_color;
@@ -82,7 +82,7 @@ void RayTrace(Ray ray, int depth, float weight, Vec3 &color, Scene &scene)
         }
     }
     
-    float ref = min_object->getRefl();
+    double ref = min_object->getRefl();
     if (ref > 0)
     {
         Vec3 newdir = N * 2 * N.Dot(V) - V;

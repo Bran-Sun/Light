@@ -7,7 +7,7 @@
 
 void Vec3::Normalize()
 {
-    float l = Length();
+    double l = Length();
     if (l == 0.0) {
         //printf("Length = 0, error!\n");
         return;
@@ -19,11 +19,11 @@ void Vec3::Normalize()
 
 Vec3 Vec3::rand_dir()
 {
-    float x, y, z;
+    double x, y, z;
     do {
-        x = (float) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
-        y = (float) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
-        z = (float) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        x = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        y = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        z = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
     } while (x * m_x + y * m_y + z * m_z <= 0);
     Vec3 v = Vec3(x, y, z);
     v.Normalize();

@@ -27,7 +27,7 @@ class Camera
 {
 public:
     Camera(int width, int height) : m_width(width), m_height(height), m_image(height, width, CV_32FC3) {}
-    void set_picSize(float width, float height) {
+    void set_picSize(double width, double height) {
         m_picWidth = width; m_picHeight = height;
         m_wInv = width / m_width; m_hInv = height / m_height;
         m_Left = width / 2 - m_wInv / 2; m_Top = height / 2 - m_hInv / 2;
@@ -57,12 +57,12 @@ public:
     
     int get_width() { return m_width; }
     int get_height() { return m_height; }
-    float get_hInv() { return m_hInv; }
-    float get_wInv() { return m_wInv; }
+    double get_hInv() { return m_hInv; }
+    double get_wInv() { return m_wInv; }
 private:
     cv::Mat m_image;
     int m_width, m_height;
-    float m_picWidth, m_picHeight, m_wInv, m_hInv, m_Left, m_Top;
+    double m_picWidth, m_picHeight, m_wInv, m_hInv, m_Left, m_Top;
     Vec3 m_o;
 };
 

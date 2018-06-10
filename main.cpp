@@ -9,15 +9,15 @@
 
 const int WINDOW_HEIGHT = 800;
 const int WINDOW_WIDTH = 800;
-const float PIC_HEIGHT = 10.0;
-const float PIC_WIDTH = 10.0;
+const double PIC_HEIGHT = 10.0;
+const double PIC_WIDTH = 10.0;
 
 
 int main()
 {
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
     camera.set_picSize(PIC_WIDTH, PIC_HEIGHT);
-    Vec3 eyePoint(0.0, 0.0, float(- 5.0));
+    Vec3 eyePoint(0.0, 0.0, double(- 5.0));
     camera.set_eyePoint(eyePoint);
     
     Scene scene;

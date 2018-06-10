@@ -5,6 +5,6 @@ find_package(OpenCV REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp Vec3.cpp Vec3.h Camera.cpp Camera.h Scene.cpp Scene.h Object/Object.cpp Object/Object.h Object/Sphere.cpp Object/Sphere.h Light.cpp Light.h Object/Plane.cpp Object/Plane.h PhotonMap.cpp PhotonMap.h Raytrace.cpp RayTrace.h PhotonMapping.h PhotonMapping.cpp)
+set(SOURCE_FILES main.cpp Vec3.cpp Vec3.h Camera.cpp Camera.h Scene.cpp Scene.h Object/Object.cpp Object/Object.h Object/Sphere.cpp Object/Sphere.h Light.cpp Light.h Object/Plane.cpp Object/Plane.h PhotonMap.cpp PhotonMap.h Raytrace.cpp RayTrace.h PhotonMapping.h PhotonMapping.cpp Object/Bezier.cpp Object/Bezier.h Object/Texture.cpp Object/Texture.h)
 add_executable(Light ${SOURCE_FILES})
 target_link_libraries(Light ${OpenCV_LIBS})

@@ -44,7 +44,7 @@ void PhotonMap::sort(int st, int ed, int mid, NodeType type)
     if (st >= (ed - 1)) return;
     swap(st, st + rand() % (ed - st));
     int lo = st, hi = ed - 1;
-    float pivot = get_pos_value(m_photons[st], type);
+    double pivot = get_pos_value(m_photons[st], type);
     Photon *p = m_photons[lo];
     while (lo < hi) {
         while (lo < hi) {
@@ -83,7 +83,7 @@ bool PhotonMap::comp(Photon *p1, Photon *p2, NodeType type)
     return false;
 }
 
-bool PhotonMap::comp(Photon *p, float v, NodeType type)
+bool PhotonMap::comp(Photon *p, double v, NodeType type)
 {
     if (type == X) return p->pos.m_x < v;
     if (type == Y) return p->pos.m_y < v;
@@ -91,7 +91,7 @@ bool PhotonMap::comp(Photon *p, float v, NodeType type)
     return false;
 }
 
-float PhotonMap::get_pos_value(Photon *p, NodeType type)
+double PhotonMap::get_pos_value(Photon *p, NodeType type)
 {
     if (type == X) return p->pos.m_x;
     if (type == Y) return p->pos.m_y;
@@ -128,7 +128,7 @@ void PhotonMap::cal_color(PhNode *node)
         Vec3 d = m_point - node->photon->pos;
         if (d.Length() < m_r) {
             Photon *p = node->photon;
-            float f = m_norm.Dot(-p->dir);
+            double f = m_norm.Dot(-p->dir);
             if (f > 0.0) {
                 m_color += p->color * f;
                 m_search++;
@@ -139,12 +139,12 @@ void PhotonMap::cal_color(PhNode *node)
     
     Photon* p = node->photon;
     
-    float b = dis(node, m_point);
+    double b = dis(node, m_point);
     if (b > 0) {
         if (node->lc) cal_color(node->lc);
         Vec3 d = m_point - p->pos;
         if (d.Length() < m_r) {
-            float f = m_norm.Dot(-p->dir);
+            double f = m_norm.Dot(-p->dir);
             if (f > 0.0) {
                 m_color += p->color * f;
                 m_search++;
@@ -156,7 +156,7 @@ void PhotonMap::cal_color(PhNode *node)
         if (node->rc) cal_color(node->rc);
         Vec3 d = m_point - p->pos;
         if (d.Length() < m_r) {
-            float f = m_norm.Dot(-p->dir);
+            double f = m_norm.Dot(-p->dir);
             if (f > 0.0) {
                 m_color += p->color * f;
                 m_search++;
@@ -166,7 +166,7 @@ void PhotonMap::cal_color(PhNode *node)
     }
 }
 
-float PhotonMap::dis(PhNode *node, const Vec3 &v)
+double PhotonMap::dis(PhNode *node, const Vec3 &v)
 {
     if (node->type == X) {
         return node->photon->pos.m_x - v.m_x;
