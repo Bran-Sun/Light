@@ -10,8 +10,8 @@
 class Sphere : public Object
 {
 public:
-    Sphere() {}
-    Sphere(Vec3 origin, double radius) : m_origin(origin), m_radius(radius) {}
+    Sphere():Object() {}
+    Sphere(Vec3 origin, double radius) : Object(), m_origin(origin), m_radius(radius) {}
     virtual InterResult intersection(Ray &ray, double &dist);
     virtual Vec3 getNormal(Vec3 &point);
 private:

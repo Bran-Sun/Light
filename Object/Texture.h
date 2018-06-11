@@ -16,15 +16,16 @@ public:
         image.convertTo(m_image, CV_32FC3, 1 / 255.0);
         //cv::imshow("floor", m_image);
         //cv::waitKey(0);
-        //std::cout << image.cols << std::endl;
-        //std::cout << image.rows << std::endl;
+        //std::cout << image << std::endl;
+        //std::cout << m_image << std::endl;
     }
     void setBorder(double x0, double x1, double y0, double y1) {
         m_x0 = x0; m_x1 = x1; m_z0 = y0; m_z1 = y1;
     }
     Vec3 getColor(double x, double z) {
-        double x_pixel = (x - m_x0) / (m_x1 - m_x0) * (m_image.rows - 1);
-        double z_pixel = (z - m_z0) / (m_z1 - m_z0) * (m_image.cols - 1);
+        if ((x > m_x1) || (x < m_x0) || (z < m_z0) || (z > m_z1)) return Vec3(0.6, 0.6, 0.6);
+        double x_pixel = (x - m_x0) / (m_x1 - m_x0) * (m_image.rows - 3) + 1;
+        double z_pixel = (z - m_z0) / (m_z1 - m_z0) * (m_image.cols - 3) + 1;
         cv::Vec3f color;
         int dx = (int) floor(x_pixel);
         int dz = (int) floor(z_pixel);

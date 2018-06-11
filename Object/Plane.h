@@ -11,8 +11,8 @@
 class Plane : public Object
 {
 public:
-    Plane() {}
-    Plane(Vec3 normal, double d): m_normal(normal), m_d(d) { }
+    Plane(): Object() {}
+    Plane(Vec3 normal, double d):Object(), m_normal(normal), m_d(d) { }
     virtual InterResult intersection(Ray &ray, double &dist);
     virtual Vec3 getNormal(Vec3 &point) { return m_normal; }
 private:

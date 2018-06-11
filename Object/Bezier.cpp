@@ -103,6 +103,7 @@ void Bezier::gen_poly()
         double r = sqrt(m_points[i].x * m_points[i].x + (m_points[i].y - m_mid) * (m_points[i].y * m_mid));
         if (m_r < r) m_r = r;
     }
+    free(s); free(v);
 }
 
 void Bezier::cal_xy(double &x, double &y, double t)
@@ -152,9 +153,10 @@ bool Bezier::cal_arg(Ray &ray, Vec3 &st)
             st.m_y -= F[1][j] * F_pre[j];
             st.m_z -= F[2][j] * F_pre[j];
         }
+        if ((st.m_y < -0.1) || (st.m_y > 1.1)) return false;
     }
     pre_ans = pre_ans - st;
-    return fabs(pre_ans.m_x + pre_ans.m_y + pre_ans.m_z) <= 0.0001;
+    return fabs(pre_ans.m_x) + fabs(pre_ans.m_y) + fabs(pre_ans.m_z) <= 0.00003;
 }
 
 bool Bezier::cal_inverse_matrix()

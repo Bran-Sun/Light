@@ -29,7 +29,7 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
         {
             Vec3 sumColor(0, 0, 0);
             Vec3 pos = camera.GetPixelCenter(j, i);
-            /*
+            
             for (int k = -1; k < 2; k++)
                 for (int t = -1; t < 2; t++)
                 {
@@ -39,9 +39,9 @@ void DrawWithPhotonMapping(Camera &camera, Scene& scene)
                     PhotonRayTrace(ray, 1, color, scene, photon_map);
                     //std::cout << color << std::endl;
                     sumColor += color * weight[k + 1][t + 1];
-                }*/
-            Ray ray(eye_point, pos - eye_point);
-            PhotonRayTrace(ray, 1, sumColor, scene, photon_map);
+                }
+            //Ray ray(eye_point, pos - eye_point);
+            //PhotonRayTrace(ray, 1, sumColor, scene, photon_map);
             //std::cout << sumColor << std::endl;
             camera.set_color(j, i, sumColor * Square);
         }

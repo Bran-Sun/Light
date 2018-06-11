@@ -18,19 +18,19 @@ void Scene::init()
     points.push_back(Vec2(0.0, 2.5));
     points.push_back(Vec2(0.0, 4.0));
     
-    Object *bezier = new Bezier(points, Vec3(0.0, -5.0, 5.0));
+    Object *bezier = new Bezier(points, Vec3(0.0, -3.0, 7.0));
     bezier->setColor(Vec3(0.7, 0.6, 0.5));
     bezier->setMaterial(marble);
     m_objects.push_back(bezier);
     
-    Object* s = new Sphere(Vec3(3.0, 0, 7.0), 1.5);
+    Object* s = new Sphere(Vec3(3.0, 0, 4.0), 1.5);
     s->setColor(Vec3( 0.7f, 0.7f, 0.7f ));
     s->setRef(0.9f);
     s->setDiff(0.5f);
     s->setSpec(0.3f);
     m_objects.push_back(s);
     
-    Object* s2 = new Sphere(Vec3(-3.0, 0.0, 7.0), 1.5f);
+    Object* s2 = new Sphere(Vec3(-3.0, 0.0, 4.0), 1.5f);
     s2->setColor(Vec3( 1.0f, 1.0f, 1.0f));
     s2->setMaterial(glass);
     m_objects.push_back(s2);

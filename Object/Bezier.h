@@ -18,7 +18,7 @@ struct Vec2
 class Bezier: public Object
 {
 public:
-    Bezier(std::vector<Vec2> points, Vec3 pos) {
+    Bezier(std::vector<Vec2> points, Vec3 pos): Object() {
         m_points = points;
         m_pos = pos;
         m_deg = (int) m_points.size() - 1;
