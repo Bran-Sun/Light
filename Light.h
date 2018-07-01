@@ -56,5 +56,19 @@ private:
     double m_x0, m_x1, m_z0, m_z1, m_y;
 };
 
+//require horizon
+class CircleLight: public Light
+{
+public:
+    CircleLight(Vec3 center, double r): Light(center), m_r(r) {
+        m_r2 = m_r * m_r;
+    }
+    virtual Ray GetEmitRay();
+    virtual InterResult intersection(Ray &ray, double &dist);
+private:
+    double m_r;
+    double m_r2;
+};
+
 
 #endif //LIGHT_LIGHT_H

@@ -20,22 +20,25 @@ public:
         //std::cout << m_image << std::endl;
     }
     void setBorder(double x0, double x1, double y0, double y1) {
-        m_x0 = x0; m_x1 = x1; m_z0 = y0; m_z1 = y1;
+        m_x0 = x0; m_x1 = x1; m_y0 = y0; m_y1 = y1;
     }
-    Vec3 getColor(double x, double z) {
-        if ((x > m_x1) || (x < m_x0) || (z < m_z0) || (z > m_z1)) return Vec3(0.6, 0.6, 0.6);
-        double x_pixel = (x - m_x0) / (m_x1 - m_x0) * (m_image.rows - 3) + 1;
-        double z_pixel = (z - m_z0) / (m_z1 - m_z0) * (m_image.cols - 3) + 1;
+    Vec3 getColor(const Vec3 &p) {
+        double x = p.m_x;
+        double y = p.m_y;
+        if ((x > m_x1) || (x < m_x0) || (y < m_y0) || (y > m_y1)) return Vec3(0.6, 0.6, 0.6);
+        double x_pixel = (m_x1 - x) / (m_x1 - m_x0) * (m_image.rows - 3) + 1;
+        double y_pixel = (m_y1 - y) / (m_y1 - m_y0) * (m_image.cols - 3) + 1;
         cv::Vec3f color;
         int dx = (int) floor(x_pixel);
-        int dz = (int) floor(z_pixel);
-        color += m_image.at<cv::Vec3f>(dx, dz) * (x_pixel - dx) * (z_pixel - dz) + m_image.at<cv::Vec3f>(dx + 1, dz) * (1 + dx - x_pixel) * (z_pixel - dz);
-        color += m_image.at<cv::Vec3f>(dx, dz + 1) * (x_pixel - dx) * (1 + dz - z_pixel) + m_image.at<cv::Vec3f>(dx + 1, dz + 1) * (1 + dx - x_pixel) * (1 + dz - z_pixel);
+        int dy = (int) floor(y_pixel);
+        color += m_image.at<cv::Vec3f>(dy, dx) * (x_pixel - dx) * (y_pixel - dy) + m_image.at<cv::Vec3f>(dy, dx + 1) * (1 + dx - x_pixel) * (y_pixel - dy);
+        color += m_image.at<cv::Vec3f>(dy + 1, dx) * (x_pixel - dx) * (1 + dy - y_pixel) + m_image.at<cv::Vec3f>(dy + 1, dx + 1) * (1 + dx - x_pixel) * (1 + dy - y_pixel);
+        //std::cout << color << std::endl;
         return Vec3(color.val[0], color.val[1], color.val[2]);
     }
 private:
     cv::Mat m_image;
-    double m_x0, m_x1, m_z0, m_z1;
+    double m_x0, m_x1, m_y0, m_y1;
 };
 
 

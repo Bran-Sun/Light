@@ -35,7 +35,7 @@ public:
         else printf("fail!\n");
         exit(0);*/
     }
-    virtual InterResult intersection(Ray &ray, double &dist);
+    virtual InterResult intersection(Ray &ray, double &dist, Vec3 &N);
     virtual Vec3 getNormal(Vec3 &point);
     
 private:
@@ -43,14 +43,13 @@ private:
     void cal_xy(double &x, double &y, double t);
     void cal_dxy(double &dx, double &dy, double t);
     bool cal_arg(Ray &ray, Vec3 &st);
-    bool cal_inverse_matrix();
+    bool cal_inverse_matrix(std::vector<double> &F);
     inline int next(int i);
     
 private:
     std::vector<Vec2> m_points;
     std::vector<double> x_poly, y_poly, x_derive, y_derive;
     Vec3 m_pos, m_arg;
-    double F[3][3], F_pre[3], F_tem[3][3];
     double m_r, m_mid;
     int m_deg;
 };

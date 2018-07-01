@@ -8,12 +8,12 @@
 #include "Scene.h"
 #include "PhotonMap.h"
 
-const int MAX_DEPTH = 6;
+const int MAX_DEPTH = 5;
 const double MIN_WEIGHT = 0.0001;
 
 void DrawWithPhotonMapping(Camera &camera, Scene& scene);
 void generate_photons(Scene &scene, PhotonMap &photon_map);
-void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth);
+void PhotonTrace(Photon* photon, Scene& scene, PhotonMap &photon_map, int depth, bool is_refr);
 void PhotonRayTrace(Ray ray, int depth, Vec3 &color, Scene &scene, PhotonMap &photon_map);
 
 #endif //LIGHT_PHOTONMAPPING_H

@@ -16,23 +16,23 @@ void RayTrace(Ray ray, int depth, double weight, Vec3 &color, Scene &scene)
     double dist = 10000.0;
     InterResult res = MISS, res_tmp;
     Object *min_object = NULL;
-    Vec3 intersectPoint, N, V, ob_color;
+    Vec3 intersectPoint, N, V, ob_color, tem_N;
     
     for ( int i = 0; i < scene.getObjectNum(); i++ )
     {
         Object *ob = scene.getObject(i);
-        res_tmp = ob->intersection(ray, dist);
+        res_tmp = ob->intersection(ray, dist, tem_N);
         if ( res_tmp != MISS)
         {
             res = res_tmp;
             min_object = ob;
+            N = tem_N;
         }
     }
     
     if ( res == MISS ) return;
     else {
         intersectPoint = ray.GetOrigin() + ray.GetDirection() * dist;
-        N = min_object->getNormal(intersectPoint);
         N.Normalize();
         V = ray.GetOrigin() - intersectPoint;
         V.Normalize();
@@ -57,7 +57,7 @@ void RayTrace(Ray ray, int depth, double weight, Vec3 &color, Scene &scene)
         for (int j = 0; j < scene.getObjectNum(); j++)
         {
             Object* ob = scene.getObject(j);
-            InterResult r = ob->intersection(newray, d);
+            InterResult r = ob->intersection(newray, d, tem_N);
             if (r != MISS) {
                 isShade = true;
                 break;

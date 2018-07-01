@@ -4,7 +4,7 @@
 
 #include "Plane.h"
 
-InterResult Plane::intersection(Ray &ray, double &dist)
+InterResult Plane::intersection(Ray &ray, double &dist, Vec3 &N)
 {
     InterResult res = MISS;
     double t = m_normal.Dot(ray.GetDirection());
@@ -19,6 +19,7 @@ InterResult Plane::intersection(Ray &ray, double &dist)
         Vec3 point = ray.GetOrigin() + ray.GetDirection() * dist_tmp;
         if (point.m_z >= 0)
         {
+            N = m_normal;
             dist = dist_tmp;
             return HIT;
         }

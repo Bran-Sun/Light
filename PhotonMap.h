@@ -9,8 +9,6 @@
 #include "Scene.h"
 #include <vector>
 
-
-
 struct Photon
 {
     Vec3 pos, dir, color;
@@ -37,7 +35,7 @@ public:
     
     PhotonMap() {
         m_size = 0;
-        m_r = 0.1;
+        m_r = 0.08;
         m_head = NULL;
     }
     void setEmitNum(int num) { m_whole_num = num; }

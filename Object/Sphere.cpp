@@ -4,7 +4,7 @@
 
 #include "Sphere.h"
 
-InterResult Sphere::intersection(Ray &ray, double &dist)
+InterResult Sphere::intersection(Ray &ray, double &dist, Vec3 &N)
 {
     InterResult result = MISS;
     Vec3 v = m_origin - ray.GetOrigin();
@@ -18,6 +18,8 @@ InterResult Sphere::intersection(Ray &ray, double &dist)
             else {
                 result = HIT;
                 dist = dist_tmp;
+                Vec3 point = ray.GetOrigin() + ray.GetDirection() * dist_tmp;
+                N = point - m_origin;
             }
         }
         else if (b > a && a > (-b)) {
@@ -26,6 +28,8 @@ InterResult Sphere::intersection(Ray &ray, double &dist)
             else {
                 result = INSIDE_HIT;
                 dist = dist_tmp;
+                Vec3 point = ray.GetOrigin() + ray.GetDirection() * dist_tmp;
+                N = point - m_origin;
             }
         }
         else {

@@ -13,7 +13,7 @@ class Plane : public Object
 public:
     Plane(): Object() {}
     Plane(Vec3 normal, double d):Object(), m_normal(normal), m_d(d) { }
-    virtual InterResult intersection(Ray &ray, double &dist);
+    virtual InterResult intersection(Ray &ray, double &dist, Vec3 &N);
     virtual Vec3 getNormal(Vec3 &point) { return m_normal; }
 private:
     Vec3 m_normal;

@@ -13,20 +13,31 @@ class Ray
 {
 public:
     Ray() {}
-    Ray(Vec3 ori, Vec3 dir) : m_ori(ori), m_dir(dir) { m_dir.Normalize(); }
+    Ray(Vec3 ori, Vec3 dir) : m_ori(ori), m_dir(dir) { m_dir.Normalize(); m_is_refr = false; }
+    Ray(Vec3 ori, Vec3 dir, bool is_refr): m_ori(ori), m_dir(dir), m_is_refr(is_refr) { m_dir.Normalize(); }
     void setOrigin(Vec3 ori) { m_ori = ori; }
     void setDirection(Vec3 dir) { m_dir = dir; }
+    void setIsRefr(bool is_refr) { m_is_refr = is_refr; }
+    void setRay(Vec3 ori, Vec3 dir) {
+        m_ori = ori;
+        m_dir = dir;
+        m_dir.Normalize();
+    }
     Vec3& GetOrigin() { return m_ori; }
     Vec3& GetDirection() { return m_dir; }
+    bool is_refr() { return m_is_refr; }
 private:
     Vec3 m_ori, m_dir;
+    bool m_is_refr;
 };
 
 
 class Camera
 {
 public:
-    Camera(int width, int height) : m_width(width), m_height(height), m_image(height, width, CV_32FC3) {}
+    Camera(int width, int height) : m_width(width), m_height(height), m_image(height, width, CV_32FC3) {
+        m_is_depth = false;
+    }
     void set_picSize(double width, double height) {
         m_picWidth = width; m_picHeight = height;
         m_wInv = width / m_width; m_hInv = height / m_height;
@@ -41,6 +52,24 @@ public:
     Ray GetRay(int x, int y) {
         Vec3 pix_pos(m_Left - x * m_wInv, m_Top - y * m_hInv, 0);
         return Ray(m_o, pix_pos - m_o);
+    }
+    
+    Ray GetFocusRay(int x, int y) {
+        Vec3 pix_pos(m_Left - x * m_wInv, m_Top - y * m_hInv, 0);
+        Vec3 dir = pix_pos - m_o;
+        dir.Normalize();
+        Vec3 newd = m_o + dir * ((m_focus_dis - m_o.m_z) / dir.m_z);
+        Vec3 neweye((2 * ((double)rand() / RAND_MAX) - 1) * m_aper, (2 * ((double)rand() / RAND_MAX) - 1) * m_aper, m_len_dis);
+        neweye = neweye + pix_pos;
+        return Ray(neweye, newd - neweye);
+    }
+    
+    bool is_depth() { return m_is_depth; }
+    void setFocus(double focusDis, double len_dis = 0.0) {
+        m_is_depth = true;
+        m_focus_dis = focusDis;
+        m_aper = focusDis / 32.0;
+        m_len_dis = 0.0;
     }
     Vec3 GetEyePoint() { return m_o; }
     Vec3 GetPixelCenter(int x, int y) { return Vec3(m_Left - x * m_wInv, m_Top - y * m_hInv, 0); }
@@ -62,6 +91,8 @@ public:
 private:
     cv::Mat m_image;
     int m_width, m_height;
+    bool m_is_depth;
+    double m_focus_dis, m_aper, m_len_dis;
     double m_picWidth, m_picHeight, m_wInv, m_hInv, m_Left, m_Top;
     Vec3 m_o;
 };

@@ -4,7 +4,7 @@
 
 #include "Bezier.h"
 
-InterResult Bezier::intersection(Ray &ray, double &dist)
+InterResult Bezier::intersection(Ray &ray, double &dist, Vec3 &N)
 {
     bool find = false;
     Vec3 best_arg(1000.0, 0.0, 0.0);
@@ -55,9 +55,12 @@ InterResult Bezier::intersection(Ray &ray, double &dist)
     
     if (best_arg.m_x >= dist) return MISS;
     else {
-        m_arg = best_arg;
-        dist = m_arg.m_x;
-        return HIT;
+        dist = best_arg.m_x;
+        double dx, dy;
+        cal_dxy(dx, dy, best_arg.m_y);
+        N = Vec3(dy * cos(best_arg.m_z), -dx, dy * sin(best_arg.m_z));
+        if (ray.is_refr()) return INSIDE_HIT;
+        else return HIT;
     }
 }
 
@@ -128,30 +131,32 @@ Vec3 Bezier::getNormal(Vec3 &point)
 bool Bezier::cal_arg(Ray &ray, Vec3 &st)
 {
     Vec3 pre_ans(0.0, 0.0, 0.0);
-    double x, y, dx, dy;
     
+    std::vector<double> F(9);
+    std::vector<double> F_pre(3);
+    double x, y, dx, dy;
     for ( int i = 0; i < 8; i++ ) {
         cal_xy(x, y, st.m_y);
         cal_dxy(dx, dy, st.m_y);
-        F[0][0] = ray.GetDirection().m_x;
-        F[1][0] = ray.GetDirection().m_y;
-        F[2][0] = ray.GetDirection().m_z;
-        F[0][1] = - cos(st.m_z) * dx;
-        F[0][2] = x * sin(st.m_z);
-        F[1][1] = - dy;
-        F[1][2] = 0.0;
-        F[2][1] = - dx * sin(st.m_z);
-        F[2][2] = - x * cos(st.m_z);
-        if (!cal_inverse_matrix()) return false;
+        F[0] = ray.GetDirection().m_x;
+        F[3] = ray.GetDirection().m_y;
+        F[6] = ray.GetDirection().m_z;
+        F[1] = - cos(st.m_z) * dx;
+        F[2] = x * sin(st.m_z);
+        F[4] = - dy;
+        F[5] = 0.0;
+        F[7] = - dx * sin(st.m_z);
+        F[8] = - x * cos(st.m_z);
+        if (!cal_inverse_matrix(F)) return false;
         F_pre[0] = ray.GetOrigin().m_x + ray.GetDirection().m_x * st.m_x - x * cos(st.m_z) - m_pos.m_x;
         F_pre[1] = ray.GetOrigin().m_y + ray.GetDirection().m_y * st.m_x - y - m_pos.m_y;
         F_pre[2] = ray.GetOrigin().m_z + ray.GetDirection().m_z * st.m_x - x * sin(st.m_z) - m_pos.m_z;
         
         pre_ans = st;
         for (int j = 0; j < 3; j++) {
-            st.m_x -= F[0][j] * F_pre[j];
-            st.m_y -= F[1][j] * F_pre[j];
-            st.m_z -= F[2][j] * F_pre[j];
+            st.m_x -= F[j] * F_pre[j];
+            st.m_y -= F[3 + j] * F_pre[j];
+            st.m_z -= F[6 + j] * F_pre[j];
         }
         if ((st.m_y < -0.1) || (st.m_y > 1.1)) return false;
     }
@@ -159,7 +164,7 @@ bool Bezier::cal_arg(Ray &ray, Vec3 &st)
     return fabs(pre_ans.m_x) + fabs(pre_ans.m_y) + fabs(pre_ans.m_z) <= 0.00003;
 }
 
-bool Bezier::cal_inverse_matrix()
+bool Bezier::cal_inverse_matrix(std::vector<double> &F)
 {
     
     /*for (int i = 0; i < 3; i++)
@@ -168,19 +173,21 @@ bool Bezier::cal_inverse_matrix()
             printf("%.6f\t", F[i][j]);
         printf("\n");
     }*/
-    double det = F[0][0] * (F[1][1] * F[2][2] - F[1][2] * F[2][1]) - F[0][1] * (F[1][0] * F[2][2] - F[2][0] * F[1][2]) + F[0][2] * (F[1][0] * F[2][1] - F[2][0] * F[1][1]);
+    //double det = F[0][0] * (F[1][1] * F[2][2] - F[1][2] * F[2][1]) - F[0][1] * (F[1][0] * F[2][2] - F[2][0] * F[1][2]) + F[0][2] * (F[1][0] * F[2][1] - F[2][0] * F[1][1]);
+    double det = F[0] * (F[4] * F[8] - F[5] * F[7]) - F[1] * (F[3] * F[8] - F[6] * F[5]) + F[2] * (F[3] * F[7] - F[6] * F[4]);
     if (det == 0.0) return false;
+    std::vector<double> F_tem(9);
     //printf("det: %.6f\n", det);
     for (int i = 0; i < 3; i++)
     {
         for ( int j = 0; j < 3; j++ )
         {
-            F_tem[i][j] = 1.0 / det * (F[next(j + 1)][next(i + 1)] * F[next(j + 2)][next(i + 2)] - F[next(j + 1)][next(i + 2)] * F[next(j + 2)][next(i + 1)]);
+            F_tem[i * 3 + j] = 1.0 / det * (F[next(j + 1) * 3 + next(i + 1)] * F[next(j + 2) * 3 + next(i + 2)] - F[next(j + 1) * 3 + next(i + 2)] * F[next(j + 2) * 3 + next(i + 1)]);
         }
     }
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            F[i][j] = F_tem[i][j];
+            F[i * 3 + j] = F_tem[i * 3 + j];
     /*for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)

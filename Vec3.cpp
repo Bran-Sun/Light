@@ -21,9 +21,9 @@ Vec3 Vec3::rand_dir()
 {
     double x, y, z;
     do {
-        x = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
-        y = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
-        z = (double) (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        x = (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        y = (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
+        z = (2 * (double(rand() % RAND_MAX) / RAND_MAX) - 1.0);
     } while (x * m_x + y * m_y + z * m_z <= 0);
     Vec3 v = Vec3(x, y, z);
     v.Normalize();
